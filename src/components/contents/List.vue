@@ -28,41 +28,15 @@ export default {
   },
   data () {
     return {
+      isRecive: true,
+      isEnd: false,
       status: '',
       tag: '',
       sort: 'answer',
       page: 0,
       limit: 20,
       catalog: "",
-      lists: [
-        {
-          uid: {
-            name: "imooc",
-            isVip: 1
-          },
-          title: "大前端课程",
-          content: "",
-          created: "2019-10-01 01:00:00",
-          catalog: 'ask',
-          fav: 40,
-          isEnd: 0,
-          read: 10,
-          answer: 0,
-          status: 0,
-          isTop: 0,
-          tags: [
-            {
-              name: "精华",
-              class: "layui-bg-red"
-            },
-            {
-              name: "热门",
-              class: "layui-bg-blue"
-            }
-          ]
-
-        }
-      ]
+      lists: []
     }
   },
   mounted () {
@@ -105,6 +79,11 @@ export default {
       this._getLists()
     },
     _getLists () {
+      if (!this.isRecive) return
+      if (this.isEnd) {
+        return
+      }
+      this.isRecive = false
       let options = {
         status: this.status,
         tag: this.tag,
@@ -115,14 +94,20 @@ export default {
         isTop: 0
       }
       getList(options).then((res) => {
+        // 防止用户网络状态不好的时候疯狂点击加载
+        this.isRecive = true
         if (res.code === 200) {
+          if (res.data.length < this.limit) {
+            this.isEnd = true
+          }
           if (this.lists.length === 0) {
-            this.lis = res.data
+            this.lists = res.data
           } else {
             this.lists = this.lists.concat(res.data)
           }
         }
       }).catch((err) => {
+        this.isRecive = true
         this.$alert(err.msg)
       })
     }
