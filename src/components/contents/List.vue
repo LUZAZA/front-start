@@ -1,20 +1,44 @@
 <template>
-  <div class="fly-panel" style="margin-bottom: 0;">
+  <div
+    class="fly-panel"
+    style="margin-bottom: 0;"
+  >
     <div class="fly-panel-title fly-filter">
-      <a :class="{ 'layui-this': status === '' && tag === '' }" @click.prevent="search()">综合</a>
+      <a
+        :class="{ 'layui-this': status === '' && tag === '' }"
+        @click.prevent="search()"
+      >综合</a>
       <span class="fly-mid"></span>
-      <a :class="{ 'layui-this': status === '0' }" @click.prevent="search(0)">未结</a>
+      <a
+        :class="{ 'layui-this': status === '0' }"
+        @click.prevent="search(0)"
+      >未结</a>
       <span class="fly-mid"></span>
-      <a :class="{ 'layui-this': status === '1' }" @click.prevent="search(1)">已结</a>
+      <a
+        :class="{ 'layui-this': status === '1' }"
+        @click.prevent="search(1)"
+      >已结</a>
       <span class="fly-mid"></span>
-      <a :class="{ 'layui-this': status === '' && tag === '精华' }" @click.prevent="search(2)">精华</a>
+      <a
+        :class="{ 'layui-this': status === '' && tag === '精华' }"
+        @click.prevent="search(2)"
+      >精华</a>
       <span class="fly-filter-right layui-hide-xs">
-        <a :class="{ 'layui-this': sort === 'created' }" @click.prevent="search(3)">按最新</a>
+        <a
+          :class="{ 'layui-this': sort === 'created' }"
+          @click.prevent="search(3)"
+        >按最新</a>
         <span class="fly-mid"></span>
-        <a :class="{ 'layui-this': sort === 'answer' }" @click.prevent="search(4)">按热议</a>
+        <a
+          :class="{ 'layui-this': sort === 'answer' }"
+          @click.prevent="search(4)"
+        >按热议</a>
       </span>
     </div>
-    <my-listitem :lists="lists" @nextpage="nextpage()"></my-listitem>
+    <my-listitem
+      :lists="lists"
+      @nextpage="nextpage()"
+    ></my-listitem>
   </div>
 </template>
 
@@ -36,14 +60,41 @@ export default {
       page: 0,
       limit: 20,
       catalog: "",
-      lists: []
+      lists: [],
+      current: ''
+    }
+  },
+  watch: {
+    current (newVal, oldVal) {
+      this.resetParams()
+    },
+    $route () {
+      let catalog = this.$route.params['catalog']
+      if (typeof catalog !== "undefined" && catalog !== '') {
+        this.catalog = catalog
+      }
+      this.resetParams()
     }
   },
   mounted () {
-    this._getLists()
+    let catalog = this.$route.params['catalog']
+    if (typeof catalog !== "undefined" && catalog !== '') {
+      this.catalog = catalog
+    }
+    this.resetParams()
   },
   methods: {
+    resetParams () {
+      this.page = 0
+      this.list = []
+      this.isEnd = false
+      this._getLists()
+    },
     search (val) {
+      if (typeof val === 'undefined' && this.current === '') {
+        return
+      }
+      this.current = val
       switch (val) {
         case 0: {
           this.status = '0'
@@ -70,6 +121,7 @@ export default {
         }
         default: {
           this.status = ''
+          this.current = ''
           this.tag = ''
         }
       }
@@ -79,7 +131,7 @@ export default {
       this._getLists()
     },
     _getLists () {
-      if (!this.isRecive) return
+      // if (!this.isRecive) return
       if (this.isEnd) {
         return
       }
@@ -108,7 +160,7 @@ export default {
         }
       }).catch((err) => {
         this.isRecive = true
-        this.$alert(err.msg)
+        this.$alert(err.message)
       })
     }
   }
